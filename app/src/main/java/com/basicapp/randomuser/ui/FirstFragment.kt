@@ -71,7 +71,13 @@ class FirstFragment : Fragment() {
                             response.body()?.userList!!
                         ) {
                             val action =
-                                FirstFragmentDirections.actionFirstFragmentToSecondFragment(lastName = it.name.last)
+                                FirstFragmentDirections.actionFirstFragmentToSecondFragment(
+                                    lastName = it.name.last,
+                                    firstName = it.name.first,
+                                    email = it.email,
+                                    location = it.location.city,
+                                    image = it.picture.large
+                                )
                             findNavController().navigate(action)
                         }
                         Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()

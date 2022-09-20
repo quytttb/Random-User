@@ -27,5 +27,16 @@
         <argument
             android:name="lastName"
             app:argType="string" />
+        <argument
+            android:name="firstName"
+            app:argType="string" />
+        <argument
+            android:name="email"
+            app:argType="string" />
+        <argument android:name="location"
+            app:argType="string" />
+        <argument
+            android:name="image"
+            app:argType="string" />
     </fragment>
 </navigation>
