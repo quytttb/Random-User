@@ -1,24 +1,22 @@
 package com.basicapp.randomuser.model
 
-import android.annotation.SuppressLint
-import androidx.recyclerview.widget.DiffUtil
 import com.squareup.moshi.Json
 
+@Json(name = "results")
 class User(
-    @Json(name = "gender")
+    @Json
     var gender: String,
 
-    @Json(name = "name")
+    @Json
     var name: Name,
 
-    @Json(name = "location")
+    @Json
     var location: Location,
 
-    @Json(name = "email")
+    @Json
     var email: String,
 
-    @Json(name = "picture")
+    @Json
     var picture: Picture
-
 ) {
 }

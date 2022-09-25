@@ -25,12 +25,5 @@
 
     </style>
 
-    <style name="Theme.RandomUser.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
 
-    <style name="Theme.RandomUser.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="Theme.RandomUser.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

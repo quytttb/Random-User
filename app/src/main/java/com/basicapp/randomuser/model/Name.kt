@@ -3,10 +3,10 @@ package com.basicapp.randomuser.model
 import com.squareup.moshi.Json
 
 data class Name(
-    @Json(name= "first")
+    @Json
     var first: String,
 
-    @Json(name= "last")
+    @Json
     var last: String
 
 )

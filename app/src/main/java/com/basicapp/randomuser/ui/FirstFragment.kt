@@ -4,19 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.basicapp.randomuser.adapter.UserAdapter
 import com.basicapp.randomuser.databinding.FragmentFirstBinding
-import com.basicapp.randomuser.model.*
+import com.basicapp.randomuser.model.User
+import com.basicapp.randomuser.repository.UserRepository
 import com.basicapp.randomuser.server.UserClient
-import com.basicapp.randomuser.server.UserInterface
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.basicapp.randomuser.server.UserService
+import com.basicapp.randomuser.viewmodel.UserViewModel
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -29,15 +27,24 @@ class FirstFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val userClient: UserInterface by lazy { UserClient.getClient() }
+    //userList
+    private lateinit var userList: List<User>
+
+    private val userService: UserService by lazy { UserClient.getClient() }
     private lateinit var userAdapter: UserAdapter
+    private val viewModel: UserViewModel by lazy {
+        ViewModelProvider(
+            this,
+            UserViewModel.NoteViewModelFactory(UserRepository(userService))
+        )[UserViewModel::class.java]
+    }
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
+        //save instance state when navigating to other fragment
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
         return binding.root
 
@@ -45,8 +52,6 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.progressBar.visibility = View.VISIBLE
-        binding.recyclerView.visibility = View.GONE
 
         getUsers()
         binding.swiperefresh.setOnRefreshListener {
@@ -57,7 +62,38 @@ class FirstFragment : Fragment() {
     }
 
     private fun getUsers() {
-        userClient.getUsers(10).enqueue(object : Callback<UserResponse> {
+        viewModel.errorMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(context, "Error $it", Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.loading.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.progressBar.visibility = View.VISIBLE
+            } else {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+        //getUsersViewModel
+        viewModel.getUsersViewModel()
+
+        userList = viewModel.userList.value?: emptyList()
+
+        //set adapter
+        userAdapter = UserAdapter(userList) {
+            val action =
+                FirstFragmentDirections.actionFirstFragmentToSecondFragment(
+                    lastName = it.name.last,
+                    firstName = it.name.first,
+                    email = it.email,
+                    location = it.location.city,
+                    image = it.picture.large
+                )
+            findNavController().navigate(action)
+        }
+
+
+/*
+        userService.getUsers(10).enqueue(object : Callback<UserResponse> {
             //onfailure
             override fun onFailure(call: Call<UserResponse>, t: Throwable) {
                 Toast.makeText(context, "Failure", Toast.LENGTH_SHORT).show()
@@ -88,11 +124,6 @@ class FirstFragment : Fragment() {
                             visibility = View.VISIBLE
                             adapter = userAdapter
                             setHasFixedSize(true)
-                            LinearLayoutManager(context).apply {
-                                orientation = LinearLayoutManager.VERTICAL
-                                binding.recyclerView.layoutManager = this
-                            }
-
                         }
 
                     }
@@ -105,6 +136,7 @@ class FirstFragment : Fragment() {
             }
 
         })
+*/
     }
 
 

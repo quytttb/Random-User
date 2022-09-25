@@ -2,11 +2,10 @@ package com.basicapp.randomuser.ui
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import androidx.fragment.app.Fragment
 import coil.load
 import com.basicapp.randomuser.R
 import com.basicapp.randomuser.databinding.FragmentSecondBinding
@@ -42,8 +41,7 @@ class SecondFragment : Fragment() {
         binding.emailDetail.text = args.email
         binding.addressDetail.text = args.location
         binding.circleImageViewDetail.load(args.image) {
-            crossfade(true)
-            crossfade(1000)
+            placeholder(R.mipmap.ic_launcher)
         }
 
 
@@ -54,4 +52,5 @@ class SecondFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
 }

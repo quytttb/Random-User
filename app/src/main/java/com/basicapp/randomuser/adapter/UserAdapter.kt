@@ -17,6 +17,7 @@ import com.basicapp.randomuser.model.User
 class UserAdapter(var users: List<User>, val onItemClicked: (User) -> Unit) :
     ListAdapter<User, UserAdapter.ViewHolder>(UserDiffUtil) {
 
+
     //view holder
     class ViewHolder(val binding: ItemsBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -49,6 +50,11 @@ class UserAdapter(var users: List<User>, val onItemClicked: (User) -> Unit) :
 
     override fun getItemCount(): Int = users.size
 
+    /**
+     * DiffUtil là 1 class giúp so sánh 2 list và trả về 1 list các item đã thay đổi
+     *
+     * thay thế cho notifyDataSetChanged()
+     */
     object UserDiffUtil : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
             return oldItem == newItem

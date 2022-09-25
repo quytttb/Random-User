@@ -4,10 +4,10 @@ import com.squareup.moshi.Json
 
 
 data class Location (
-    @Json(name= "city")
+    @Json
     var city: String,
 
-    @Json(name= "state")
+    @Json
     var state: String
 
 )

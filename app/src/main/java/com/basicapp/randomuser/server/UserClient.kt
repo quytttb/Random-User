@@ -12,12 +12,12 @@ object UserClient {
         .add(KotlinJsonAdapterFactory())
         .build()
 
-    fun getClient(): UserInterface {
+    fun getClient(): UserService {
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-        return retrofit.create(UserInterface::class.java)
+        return retrofit.create(UserService::class.java)
     }
 
 }
