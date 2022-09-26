@@ -15,42 +15,23 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     val userList: LiveData<List<User>> = _userList
 
 
-    var job: Job? = null
-    val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         onError("Exception handled: ${throwable.localizedMessage}")
     }
     private val _loading = MutableLiveData<Boolean>()
     val loading: LiveData<Boolean> = _loading
 
-    fun getUsersViewModel() {
-/*
-        job = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
-            val response = userRepository.getUsers(10)
-            withContext(Dispatchers.Main) {
-                when {
-                    response.isSuccessful -> {
-                        _userList.postValue(response.body())
-                        _loading.value = false
-                    }
-                    else -> {
-                        onError("Error : ${response.message()} ")
-                    }
+    fun getUsersViewModel() = CoroutineScope(Dispatchers.IO + exceptionHandler).launch {
+        val response = userRepository.getUsers(10)
+        withContext(Dispatchers.Main) {
+            when {
+                response.isSuccessful -> {
+                    _userList.postValue(response.body()?.userList!!)
+                    response.body()?.userList!!
+                    _loading.value = false
                 }
-            }
-        }
-*/
-
-        viewModelScope.launch(Dispatchers.IO + exceptionHandler) {
-            val response = userRepository.getUsers(10)
-            withContext(Dispatchers.Main) {
-                when {
-                    response.isSuccessful -> {
-                        _userList.postValue(response.body())
-                        _loading.value = false
-                    }
-                    else -> {
-                        onError("Error : ${response.message()} ")
-                    }
+                else -> {
+                    onError("Error : ${response.message()} ")
                 }
             }
         }
@@ -64,7 +45,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        job?.cancel()
+        getUsersViewModel().cancel()
     }
 
     /**

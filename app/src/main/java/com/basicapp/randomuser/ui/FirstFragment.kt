@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.basicapp.randomuser.adapter.UserAdapter
 import com.basicapp.randomuser.databinding.FragmentFirstBinding
-import com.basicapp.randomuser.model.User
 import com.basicapp.randomuser.repository.UserRepository
 import com.basicapp.randomuser.server.UserClient
 import com.basicapp.randomuser.server.UserService
@@ -26,9 +25,6 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
-    //userList
-    private lateinit var userList: List<User>
 
     private val userService: UserService by lazy { UserClient.getClient() }
     private lateinit var userAdapter: UserAdapter
@@ -52,6 +48,19 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.recyclerView.visibility = View.GONE
+        viewModel.errorMessage.observe(viewLifecycleOwner) {
+            Toast.makeText(requireContext(), "Error $it", Toast.LENGTH_SHORT).show()
+        }
+
+        viewModel.loading.observe(viewLifecycleOwner) {
+            if (it) {
+                binding.progressBar.visibility = View.VISIBLE
+            } else {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+
 
         getUsers()
         binding.swiperefresh.setOnRefreshListener {
@@ -62,83 +71,31 @@ class FirstFragment : Fragment() {
     }
 
     private fun getUsers() {
-        viewModel.errorMessage.observe(viewLifecycleOwner) {
-            Toast.makeText(context, "Error $it", Toast.LENGTH_SHORT).show()
-        }
-
-        viewModel.loading.observe(viewLifecycleOwner) {
-            if (it) {
-                binding.progressBar.visibility = View.VISIBLE
-            } else {
-                binding.progressBar.visibility = View.GONE
-            }
-        }
         //getUsersViewModel
+
         viewModel.getUsersViewModel()
 
-        userList = viewModel.userList.value?: emptyList()
+        viewModel.userList.observe(viewLifecycleOwner) { users ->
+            //set adapter
+            userAdapter = UserAdapter(users) {
+                val action =
+                    FirstFragmentDirections.actionFirstFragmentToSecondFragment(
+                        lastName = it.name.last,
+                        firstName = it.name.first,
+                        email = it.email,
+                        location = it.location.city,
+                        image = it.picture.large
+                    )
+                findNavController().navigate(action)
+            }
 
-        //set adapter
-        userAdapter = UserAdapter(userList) {
-            val action =
-                FirstFragmentDirections.actionFirstFragmentToSecondFragment(
-                    lastName = it.name.last,
-                    firstName = it.name.first,
-                    email = it.email,
-                    location = it.location.city,
-                    image = it.picture.large
-                )
-            findNavController().navigate(action)
+            binding.recyclerView.apply {
+                visibility = View.VISIBLE
+                adapter = userAdapter
+                setHasFixedSize(true)
+            }
         }
-
-
-/*
-        userService.getUsers(10).enqueue(object : Callback<UserResponse> {
-            //onfailure
-            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                Toast.makeText(context, "Failure", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                when {
-                    response.isSuccessful -> {
-                        //respone to User
-                        userAdapter = UserAdapter(
-                            response.body()?.userList!!
-                        ) {
-                            val action =
-                                FirstFragmentDirections.actionFirstFragmentToSecondFragment(
-                                    lastName = it.name.last,
-                                    firstName = it.name.first,
-                                    email = it.email,
-                                    location = it.location.city,
-                                    image = it.picture.large
-                                )
-                            findNavController().navigate(action)
-                        }
-                        Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show()
-
-                        binding.progressBar.visibility = View.GONE
-
-                        binding.recyclerView.apply {
-                            visibility = View.VISIBLE
-                            adapter = userAdapter
-                            setHasFixedSize(true)
-                        }
-
-                    }
-                    else -> {
-                        //error code
-                        Toast.makeText(context, "Error ${response.code()}", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }
-
-        })
-*/
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
